@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Japanese Grammar Chart</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: #f4f6f9;
+      color: #333;
+      padding: 2rem 1rem;
+      margin: 0;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      color: #2c3e50;
+    }
+    .table-wrapper {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+    th, td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid #e1e8ed;
+    }
+    th {
+      background-color: #f8f9fa;
+      color: #495057;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    tr:hover {
+      background-color: #f8fafc;
+    }
+    .jp-text {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #1a252f;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .play-btn {
+      background-color: #4f46e5;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: background-color 0.2s, transform 0.1s;
+      flex-shrink: 0;
+    }
+    .play-btn:hover {
+      background-color: #4338ca;
+      transform: scale(1.05);
+    }
+    .play-btn:active {
+      transform: scale(0.95);
+    }
+    .empty-cell {
+      color: #a0aec0;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Japanese Conjugation Reference</h1>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Dict form</th>
+            <th>ない (Negation)</th>
+            <th>No longer</th>
+            <th>Doesn't want no longer</th>
+            <th>翻訳 (Translation)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <div class="jp-text">
+                <span>ある</span>
+                <button class="play-btn" onclick="speak('ある')" title="Listen">🔊</button>
+              </div>
+            </td>
+            <td>
+              <div class="jp-text">
+                <span>ない</span>
+                <button class="play-btn" onclick="speak('ない')" title="Listen">🔊</button>
+              </div>
+            </td>
+            <td>
+              <div class="jp-text">
+                <span>なくなる</span>
+                <button class="play-btn" onclick="speak('なくなる')" title="Listen">🔊</button>
+              </div>
+            </td>
+            <td><span class="empty-cell">—</span></td>
+            <td>Is no longer</td>
+          </tr>
+          <tr>
+            <td>
+              <div class="jp-text">
+                <span>する</span>
+                <button class="play-btn" onclick="speak('する')" title="Listen">🔊</button>
+              </div>
+            </td>
+            <td>
+              <div class="jp-text">
+                <span>しない</span>
+                <button class="play-btn" onclick="speak('しない')" title="Listen">🔊</button>
+              </div>
+            </td>
+            <td>
+              <div class="jp-text">
+                <span>しなくなる</span>
+                <button class="play-btn" onclick="speak('しなくなる')" title="Listen">🔊</button>
+              </div>
+            </td>
+            <td>
+              <div class="jp-text">
+                <span>したくなくなる</span>
+                <button class="play-btn" onclick="speak('したくなくなる')" title="Listen">🔊</button>
+              </div>
+            </td>
+            <td>No longer wants to do</td>
+          </tr>
+          <tr>
+            <td>
+              <div class="jp-text">
+                <span>来る（くる）</span>
+                <button class="play-btn" onclick="speak('来る')" title="Listen">🔊</button>
+              </div>
+            </td>
+            <td>
+              <div class="jp-text">
+                <span>来ない</span>
+                <button class="play-btn" onclick="speak('来ない')" title="Listen">🔊</button>
+              </div>
+            </td>
+            <td>
+              <div class="jp-text">
+                <span>来なくなる</span>
+                <button class="play-btn" onclick="speak('来なくなる')" title="Listen">🔊</button>
+              </div>
+            </td>
+            <td>
+              <div class="jp-text">
+                <span>来たくなくなる</span>
+                <button class="play-btn" onclick="speak('来たくなくなる')" title="Listen">🔊</button>
+              </div>
+            </td>
+            <td>No longer wants to come</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    let voices = [];
+
+    function populateVoices() {
+      voices = window.speechSynthesis.getVoices();
+    }
+
+    populateVoices();
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+      speechSynthesis.onvoiceschanged = populateVoices;
+    }
+
+    function speak(text) {
+      if (!('speechSynthesis' in window)) {
+        alert('Text-to-speech is not supported in this browser.');
+        return;
+      }
+
+      window.speechSynthesis.cancel(); // Stop active speech
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'ja-JP';
+      utterance.rate = 0.85;
+
+      // Priority: Microsoft Nanami Online (Natural) -> any Nanami -> any ja-JP voice
+      const nanamiVoice = voices.find(v => v.name.includes('Microsoft Nanami Online (Natural)')) ||
+                          voices.find(v => v.name.includes('Nanami')) ||
+                          voices.find(v => v.lang === 'ja-JP' || v.lang === 'ja_JP');
+
+      if (nanamiVoice) {
+        utterance.voice = nanamiVoice;
+      }
+
+      window.speechSynthesis.speak(utterance);
+    }
+  </script>
+</body>
+</html>
