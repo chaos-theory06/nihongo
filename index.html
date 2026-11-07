@@ -16,7 +16,7 @@
       margin: 0;
     }
     .container {
-      max-width: 1000px;
+      max-width: 1200px;
       margin: 0 auto;
       background: #ffffff;
       padding: 2rem;
@@ -40,6 +40,7 @@
       padding: 12px 16px;
       text-align: left;
       border-bottom: 1px solid #e1e8ed;
+      vertical-align: middle;
     }
     th {
       background-color: #f8f9fa;
@@ -51,12 +52,21 @@
       background-color: #f8fafc;
     }
     .jp-text {
-      font-size: 1.1rem;
+      font-size: 1.05rem;
       font-weight: 500;
       color: #1a252f;
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
+    }
+    .sentence-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+    .en-subtext {
+      font-size: 0.85rem;
+      color: #64748b;
     }
     .play-btn {
       background-color: #4f46e5;
@@ -99,6 +109,7 @@
             <th>No longer</th>
             <th>Doesn't want no longer</th>
             <th>翻訳 (Translation)</th>
+            <th>Example Sentence</th>
           </tr>
         </thead>
         <tbody>
@@ -123,6 +134,15 @@
             </td>
             <td><span class="empty-cell">—</span></td>
             <td>Is no longer</td>
+            <td>
+              <div class="sentence-container">
+                <div class="jp-text">
+                  <span>自信がなくなる。</span>
+                  <button class="play-btn" onclick="speak('じしんがなくなる')" title="Listen">🔊</button>
+                </div>
+                <div class="en-subtext">I lose my confidence.</div>
+              </div>
+            </td>
           </tr>
           <tr>
             <td>
@@ -150,6 +170,15 @@
               </div>
             </td>
             <td>No longer wants to do</td>
+            <td>
+              <div class="sentence-container">
+                <div class="jp-text">
+                  <span>勉強をしたくなくなる。</span>
+                  <button class="play-btn" onclick="speak('べんきょうをしたくなくなる')" title="Listen">🔊</button>
+                </div>
+                <div class="en-subtext">I no longer feel like studying.</div>
+              </div>
+            </td>
           </tr>
           <tr>
             <td>
@@ -161,22 +190,31 @@
             <td>
               <div class="jp-text">
                 <span>来ない</span>
-                <button class="play-btn" onclick="speak('来ない')" title="Listen">🔊</button>
+                <button class="play-btn" onclick="speak('こない')" title="Listen">🔊</button>
               </div>
             </td>
             <td>
               <div class="jp-text">
                 <span>来なくなる</span>
-                <button class="play-btn" onclick="speak('来なくなる')" title="Listen">🔊</button>
+                <button class="play-btn" onclick="speak('こなくなる')" title="Listen">🔊</button>
               </div>
             </td>
             <td>
               <div class="jp-text">
                 <span>来たくなくなる</span>
-                <button class="play-btn" onclick="speak('来たくなくなる')" title="Listen">🔊</button>
+                <button class="play-btn" onclick="speak('きたくなくなる')" title="Listen">🔊</button>
               </div>
             </td>
             <td>No longer wants to come</td>
+            <td>
+              <div class="sentence-container">
+                <div class="jp-text">
+                  <span>混んでいると、ここに来たくなくなる。</span>
+                  <button class="play-btn" onclick="speak('こんでいると、ここにきたくなくなる')" title="Listen">🔊</button>
+                </div>
+                <div class="en-subtext">When it's crowded, I start not wanting to come here anymore.</div>
+              </div>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -201,13 +239,12 @@
         return;
       }
 
-      window.speechSynthesis.cancel(); // Stop active speech
+      window.speechSynthesis.cancel();
 
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'ja-JP';
       utterance.rate = 0.85;
 
-      // Priority: Microsoft Nanami Online (Natural) -> any Nanami -> any ja-JP voice
       const nanamiVoice = voices.find(v => v.name.includes('Microsoft Nanami Online (Natural)')) ||
                           voices.find(v => v.name.includes('Nanami')) ||
                           voices.find(v => v.lang === 'ja-JP' || v.lang === 'ja_JP');
