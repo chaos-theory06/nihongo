@@ -28,6 +28,16 @@
       margin-bottom: 1.5rem;
       color: #2c3e50;
     }
+    .audio-help,
+    #audio-status {
+      max-width: 760px;
+      margin: 0 auto 1rem;
+      color: #64748b;
+      text-align: center;
+    }
+    #audio-status:empty {
+      display: none;
+    }
     .table-wrapper {
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
@@ -201,6 +211,8 @@
   <main>
   <section class="container" id="conjugation" aria-labelledby="page-title">
     <h1 id="page-title">Japanese Conjugation Reference</h1>
+    <p class="audio-help">Audio uses your device's text-to-speech. If you hear nothing, check media volume, Silent mode, and Japanese speech settings.</p>
+    <p id="audio-status" role="status" aria-live="polite"></p>
     <p class="table-hint">Swipe the table horizontally to view all columns.</p>
     <div class="table-wrapper">
       <table>
@@ -1588,38 +1600,58 @@
   </main>
 
   <script>
-    let voices = [];
+    const audioStatus = document.getElementById('audio-status');
 
     function populateVoices() {
-      voices = window.speechSynthesis.getVoices();
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.getVoices();
+      }
     }
 
-    populateVoices();
-    if (speechSynthesis.onvoiceschanged !== undefined) {
-      speechSynthesis.onvoiceschanged = populateVoices;
+    if ('speechSynthesis' in window) {
+      populateVoices();
+      window.speechSynthesis.onvoiceschanged = populateVoices;
     }
 
     function speak(text) {
-      if (!('speechSynthesis' in window)) {
-        alert('Text-to-speech is not supported in this browser.');
+      if (!('speechSynthesis' in window) || !('SpeechSynthesisUtterance' in window)) {
+        audioStatus.textContent = 'Text-to-speech is not supported in this browser.';
         return;
       }
 
-      window.speechSynthesis.cancel();
+      const synthesis = window.speechSynthesis;
+      if (synthesis.speaking || synthesis.pending) {
+        synthesis.cancel();
+      }
 
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'ja-JP';
       utterance.rate = 0.85;
 
-      const nanamiVoice = voices.find(v => v.name.includes('Microsoft Nanami Online (Natural)')) ||
-                          voices.find(v => v.name.includes('Nanami')) ||
-                          voices.find(v => v.lang === 'ja-JP' || v.lang === 'ja_JP');
+      const voices = synthesis.getVoices();
+      const japaneseVoice = voices.find(voice => voice.name.includes('Microsoft Nanami Online (Natural)')) ||
+                            voices.find(voice => voice.name.includes('Nanami')) ||
+                            voices.find(voice => /^ja[-_]/i.test(voice.lang));
 
-      if (nanamiVoice) {
-        utterance.voice = nanamiVoice;
+      if (japaneseVoice) {
+        utterance.voice = japaneseVoice;
+        utterance.lang = japaneseVoice.lang;
       }
 
-      window.speechSynthesis.speak(utterance);
+      utterance.onstart = () => {
+        audioStatus.textContent = 'Playing Japanese audio.';
+      };
+      utterance.onend = () => {
+        audioStatus.textContent = '';
+      };
+      utterance.onerror = event => {
+        if (event.error !== 'canceled' && event.error !== 'interrupted') {
+          audioStatus.textContent = 'Audio could not be played. Check your media volume and Japanese text-to-speech settings.';
+        }
+      };
+
+      synthesis.resume();
+      synthesis.speak(utterance);
     }
 
     const indexToggle = document.getElementById('index-toggle');
