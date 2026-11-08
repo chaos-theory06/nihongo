@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Japanese Conjugation Reference</title>
   <style>
     * {
@@ -30,9 +30,18 @@
     }
     .table-wrapper {
       overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-x: contain;
+    }
+    .table-hint {
+      display: none;
+      margin: 0.75rem 0 0;
+      color: #64748b;
+      font-size: 0.9rem;
     }
     table {
       width: 100%;
+      min-width: 900px;
       border-collapse: collapse;
       margin-top: 1rem;
     }
@@ -81,8 +90,8 @@
       color: white;
       border: none;
       border-radius: 50%;
-      width: 30px;
-      height: 30px;
+      width: 44px;
+      height: 44px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -104,11 +113,12 @@
     }
     .site-nav {
       position: fixed;
-      top: 1rem;
-      left: 1rem;
+      top: max(1rem, env(safe-area-inset-top));
+      left: max(1rem, env(safe-area-inset-left));
       z-index: 10;
     }
     .index-toggle {
+      min-height: 44px;
       padding: 0.7rem 1rem;
       border: 0;
       border-radius: 8px;
@@ -132,6 +142,10 @@
       width: min(280px, calc(100vw - 2rem));
       margin-top: 0.5rem;
       padding: 0.5rem;
+      max-height: calc(100vh - 5rem);
+      max-height: calc(100dvh - 5rem);
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
       border: 1px solid #e1e8ed;
       border-radius: 10px;
       background: #ffffff;
@@ -159,10 +173,16 @@
     }
     @media (max-width: 600px) {
       body {
-        padding: 1rem 0.75rem;
+        padding: max(4.5rem, calc(env(safe-area-inset-top) + 3.5rem))
+          max(0.75rem, env(safe-area-inset-right))
+          max(1rem, env(safe-area-inset-bottom))
+          max(0.75rem, env(safe-area-inset-left));
       }
       .container {
         padding: 1.25rem;
+      }
+      .table-hint {
+        display: block;
       }
     }
   </style>
@@ -181,6 +201,7 @@
   <main>
   <section class="container" id="conjugation" aria-labelledby="page-title">
     <h1 id="page-title">Japanese Conjugation Reference</h1>
+    <p class="table-hint">Swipe the table horizontally to view all columns.</p>
     <div class="table-wrapper">
       <table>
         <thead>
