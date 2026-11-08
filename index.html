@@ -154,69 +154,6 @@
     .site-nav a:focus-visible {
       background: #f1f5f9;
     }
-    .container + .container {
-      margin-top: 1.5rem;
-    }
-    .practice-card {
-      max-width: 560px;
-      margin: 0 auto;
-      padding: 2rem;
-      border: 1px solid #e1e8ed;
-      border-radius: 12px;
-      background: #f8fafc;
-      text-align: center;
-    }
-    .kanji-character {
-      margin: 0;
-      color: #2c3e50;
-      font-size: clamp(5rem, 18vw, 8rem);
-      line-height: 1.2;
-    }
-    .practice-prompt {
-      margin: 0.5rem 0 1.5rem;
-      color: #64748b;
-    }
-    .question-progress {
-      margin: 0;
-      color: #64748b;
-      font-weight: 600;
-    }
-    .kanji-answer {
-      margin: 1.5rem 0;
-      padding: 1rem;
-      border-radius: 8px;
-      background: #ffffff;
-    }
-    .kanji-answer h3 {
-      margin-top: 0;
-      color: #2c3e50;
-    }
-    .kanji-answer p {
-      margin: 0.5rem 0;
-    }
-    .practice-actions {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 0.75rem;
-    }
-    .practice-btn {
-      padding: 0.7rem 1rem;
-      border: 0;
-      border-radius: 8px;
-      background: #4f46e5;
-      color: #ffffff;
-      font: inherit;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    .practice-btn:hover {
-      background: #4338ca;
-    }
-    .practice-btn:focus-visible {
-      outline: 3px solid #a5b4fc;
-      outline-offset: 2px;
-    }
     [hidden] {
       display: none !important;
     }
@@ -225,9 +162,6 @@
         padding: 1rem 0.75rem;
       }
       .container {
-        padding: 1.25rem;
-      }
-      .practice-card {
         padding: 1.25rem;
       }
     }
@@ -240,7 +174,6 @@
     <nav class="site-nav-panel" id="site-index" aria-label="Page index" hidden>
       <ul>
         <li><a href="#conjugation">Conjugation Reference</a></li>
-        <li><a href="#kanji-practice">Kanji Practice</a></li>
       </ul>
     </nav>
   </div>
@@ -1631,29 +1564,6 @@
   </div>
   </section>
 
-  <section class="container" id="kanji-practice" aria-labelledby="practice-title">
-    <h2 id="practice-title">Kanji Practice</h2>
-    <p>Try to recall the meaning and readings, then reveal the answer.</p>
-    <div class="practice-card">
-      <p class="question-progress" id="question-progress" aria-live="polite">Question 1 / 10</p>
-      <p class="practice-prompt">What does this kanji or word mean?</p>
-      <p class="kanji-character" id="kanji-character" lang="ja" aria-live="polite">日</p>
-      <div class="practice-actions">
-        <button class="practice-btn" id="reveal-answer" type="button" aria-expanded="false" aria-controls="kanji-answer">Show answer</button>
-        <button class="practice-btn" id="next-kanji" type="button">Next question</button>
-      </div>
-      <div class="kanji-answer" id="kanji-answer" hidden>
-        <h3 id="kanji-meaning"></h3>
-        <p><strong>On’yomi:</strong> <span id="kanji-onyomi"></span></p>
-        <p><strong>Kun’yomi:</strong> <span id="kanji-kunyomi"></span></p>
-        <p><strong>Example:</strong> <span id="kanji-example" lang="ja"></span></p>
-      </div>
-    </div>
-    <div class="practice-card" id="practice-complete" role="status" hidden>
-      <h2>Practice Complete!</h2>
-      <p>You finished all 10 questions. Great work!</p>
-    </div>
-  </section>
   </main>
 
   <script>
@@ -1690,58 +1600,6 @@
 
       window.speechSynthesis.speak(utterance);
     }
-
-    const kanjiCards = [
-      { kanji: '地震', meaning: 'Earthquake', onyomi: 'チ、シン', kunyomi: 'つち、ふる', example: '地震（じしん）— earthquake' },
-      { kanji: '日', meaning: 'sun; day', onyomi: 'ニチ、ジツ', kunyomi: 'ひ、か', example: '日曜日（にちようび）— Sunday' },
-      { kanji: '月', meaning: 'moon; month', onyomi: 'ゲツ、ガツ', kunyomi: 'つき', example: '月曜日（げつようび）— Monday' },
-      { kanji: '火', meaning: 'fire', onyomi: 'カ', kunyomi: 'ひ', example: '火山（かざん）— volcano' },
-      { kanji: '水', meaning: 'water', onyomi: 'スイ', kunyomi: 'みず', example: '水曜日（すいようび）— Wednesday' },
-      { kanji: '木', meaning: 'tree; wood', onyomi: 'モク、ボク', kunyomi: 'き', example: '木曜日（もくようび）— Thursday' },
-      { kanji: '金', meaning: 'gold; money', onyomi: 'キン、コン', kunyomi: 'かね', example: '金曜日（きんようび）— Friday' },
-      { kanji: '土', meaning: 'earth; soil', onyomi: 'ド、ト', kunyomi: 'つち', example: '土曜日（どようび）— Saturday' },
-      { kanji: '山', meaning: 'mountain', onyomi: 'サン', kunyomi: 'やま', example: '火山（かざん）— volcano' },
-      { kanji: '川', meaning: 'river', onyomi: 'セン', kunyomi: 'かわ', example: '川（かわ）— river' }
-    ];
-
-    const kanjiCharacter = document.getElementById('kanji-character');
-    const kanjiAnswer = document.getElementById('kanji-answer');
-    const revealAnswerButton = document.getElementById('reveal-answer');
-    const questionProgress = document.getElementById('question-progress');
-    const practiceCard = document.querySelector('.practice-card');
-    const practiceComplete = document.getElementById('practice-complete');
-    let currentKanjiIndex = 0;
-
-    function showKanji(index) {
-      const card = kanjiCards[index];
-      kanjiCharacter.textContent = card.kanji;
-      document.getElementById('kanji-meaning').textContent = card.meaning;
-      document.getElementById('kanji-onyomi').textContent = card.onyomi;
-      document.getElementById('kanji-kunyomi').textContent = card.kunyomi;
-      document.getElementById('kanji-example').textContent = card.example;
-      kanjiAnswer.hidden = true;
-      revealAnswerButton.setAttribute('aria-expanded', 'false');
-    }
-
-    showKanji(currentKanjiIndex);
-
-    revealAnswerButton.addEventListener('click', () => {
-      kanjiAnswer.hidden = !kanjiAnswer.hidden;
-      revealAnswerButton.setAttribute('aria-expanded', String(!kanjiAnswer.hidden));
-      revealAnswerButton.textContent = kanjiAnswer.hidden ? 'Show answer' : 'Hide answer';
-    });
-
-    document.getElementById('next-kanji').addEventListener('click', () => {
-      currentKanjiIndex += 1;
-      if (currentKanjiIndex === kanjiCards.length) {
-        practiceCard.hidden = true;
-        practiceComplete.hidden = false;
-        return;
-      }
-      questionProgress.textContent = `Question ${currentKanjiIndex + 1} / ${kanjiCards.length}`;
-      showKanji(currentKanjiIndex);
-      revealAnswerButton.textContent = 'Show answer';
-    });
 
     const indexToggle = document.getElementById('index-toggle');
     const siteIndex = document.getElementById('site-index');
