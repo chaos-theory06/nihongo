@@ -97,6 +97,125 @@
     .index-list > li > .index-label {
       font-weight: 700;
     }
+    .week-one-row {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    .week-one-row a {
+      flex: 1;
+    }
+    .quiz-launch,
+    .quiz-action,
+    .quiz-choice {
+      min-height: 44px;
+      padding: 0.6rem 0.85rem;
+      border: 0;
+      border-radius: 8px;
+      background: #2c3e50;
+      color: #ffffff;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .quiz-launch:hover,
+    .quiz-action:hover:not(:disabled) {
+      background: #435b73;
+    }
+    .quiz-launch:focus-visible,
+    .quiz-action:focus-visible,
+    .quiz-choice:focus-visible {
+      outline: 3px solid #818cf8;
+      outline-offset: 2px;
+    }
+    .quiz-dialog {
+      width: min(560px, calc(100% - 2rem));
+      max-height: min(90vh, 760px);
+      max-height: min(90dvh, 760px);
+      padding: 1.5rem;
+      overflow-y: auto;
+      border: 0;
+      border-radius: 14px;
+      background: #ffffff;
+      color: #2c3e50;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25);
+    }
+    .quiz-dialog::backdrop {
+      background: rgba(15, 23, 42, 0.62);
+    }
+    .quiz-dialog h2 {
+      margin: 0 0 0.5rem;
+    }
+    .quiz-progress {
+      margin: 0 0 1rem;
+      color: #64748b;
+      font-weight: 600;
+    }
+    .quiz-question {
+      margin: 0 0 1rem;
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+    .quiz-choices {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.75rem;
+    }
+    .quiz-choice {
+      min-height: 56px;
+      background: #f1f5f9;
+      color: #2c3e50;
+      border: 2px solid #dbe3ec;
+      overflow-wrap: anywhere;
+    }
+    .quiz-choice:hover:not(:disabled) {
+      background: #e2e8f0;
+    }
+    .quiz-choice:disabled {
+      cursor: default;
+    }
+    .quiz-choice.is-correct {
+      border-color: #15803d;
+      background: #dcfce7;
+      color: #14532d;
+    }
+    .quiz-choice.is-wrong {
+      border-color: #b91c1c;
+      background: #fee2e2;
+      color: #7f1d1d;
+    }
+    .quiz-feedback {
+      min-height: 1.5em;
+      margin: 1rem 0;
+      font-weight: 700;
+    }
+    .quiz-feedback.is-correct {
+      color: #15803d;
+    }
+    .quiz-feedback.is-wrong {
+      color: #b91c1c;
+    }
+    .quiz-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+    }
+    .quiz-action.cancel {
+      background: #e2e8f0;
+      color: #2c3e50;
+    }
+    .quiz-action:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    @media (max-width: 420px) {
+      .quiz-dialog {
+        padding: 1.25rem;
+      }
+      .quiz-choices {
+        grid-template-columns: 1fr;
+      }
+    }
     .site-nav a:hover,
     .site-nav a:focus-visible {
       background: #f1f5f9;
@@ -128,7 +247,10 @@
             <li>
               <span class="index-label">Kanji N4</span>
               <ul>
-                <li><a href="kanji-week1.html">Kanji week 1</a></li>
+                <li class="week-one-row">
+                  <a href="kanji-week1.html">Kanji week 1</a>
+                  <button class="quiz-launch" id="open-kanji-quiz" type="button">Quiz</button>
+                </li>
                 <li><span class="index-label">Kanji week 2</span></li>
                 <li><span class="index-label">Kanji week 3</span></li>
               </ul>
@@ -141,6 +263,17 @@
   <main>
     <h1>Japanese grammar and kanji resources</h1>
   </main>
+  <dialog class="quiz-dialog" id="kanji-quiz" aria-labelledby="quiz-title">
+    <h2 id="quiz-title">Kanji Week 1 Quiz</h2>
+    <p class="quiz-progress" id="quiz-progress"></p>
+    <p class="quiz-question" id="quiz-question"></p>
+    <div class="quiz-choices" id="quiz-choices"></div>
+    <p class="quiz-feedback" id="quiz-feedback" role="status" aria-live="polite"></p>
+    <div class="quiz-actions">
+      <button class="quiz-action cancel" id="cancel-quiz" type="button">Cancel</button>
+      <button class="quiz-action" id="next-question" type="button" disabled>Next</button>
+    </div>
+  </dialog>
   <script>
     const indexToggle = document.getElementById('index-toggle');
     const siteIndex = document.getElementById('site-index');
@@ -171,6 +304,131 @@
         setIndexExpanded(false);
         indexToggle.focus();
       }
+    });
+
+    const weekOneKanji = [
+      { kanji: '交通', reading: 'こうつう' },
+      { kanji: '普通', reading: 'ふつう' },
+      { kanji: '通る', reading: 'とおる' },
+      { kanji: '通り', reading: 'とおり' },
+      { kanji: '通う', reading: 'かよう' },
+      { kanji: '降る', reading: 'ふる' },
+      { kanji: '降りる', reading: 'おりる' },
+      { kanji: '食料品', reading: 'しょくりょうひん' },
+      { kanji: '品物', reading: 'しなもの' },
+      { kanji: '着る', reading: 'きる' },
+      { kanji: '着く', reading: 'つく' },
+      { kanji: '動物', reading: 'どうぶつ' },
+      { kanji: '荷物', reading: 'にもつ' },
+      { kanji: '食べ物', reading: 'たべもの' },
+      { kanji: '建物', reading: 'たてもの' },
+      { kanji: '運動', reading: 'うんどう' },
+      { kanji: '動く', reading: 'うごく' },
+      { kanji: '建てる', reading: 'たてる' },
+      { kanji: '二階建て', reading: 'にかいだて' },
+      { kanji: '今夜', reading: 'こんや' },
+      { kanji: '夜', reading: 'よる' },
+      { kanji: '台所', reading: 'だいどころ' }
+    ];
+
+    const quizDialog = document.getElementById('kanji-quiz');
+    const quizProgress = document.getElementById('quiz-progress');
+    const quizQuestion = document.getElementById('quiz-question');
+    const quizChoices = document.getElementById('quiz-choices');
+    const quizFeedback = document.getElementById('quiz-feedback');
+    const nextQuestionButton = document.getElementById('next-question');
+    let quizQuestions = [];
+    let currentQuestionIndex = 0;
+    let answered = false;
+
+    function shuffled(items) {
+      const result = [...items];
+      for (let index = result.length - 1; index > 0; index -= 1) {
+        const otherIndex = Math.floor(Math.random() * (index + 1));
+        [result[index], result[otherIndex]] = [result[otherIndex], result[index]];
+      }
+      return result;
+    }
+
+    function startQuiz() {
+      quizQuestions = shuffled(weekOneKanji).slice(0, 10).map(card => ({
+        card,
+        asksForKanji: Math.random() < 0.5,
+        choices: shuffled(weekOneKanji.filter(option => option !== card)).slice(0, 3)
+      }));
+      quizQuestions.forEach(question => {
+        question.choices.push(question.card);
+        question.choices = shuffled(question.choices);
+      });
+      currentQuestionIndex = 0;
+      renderQuestion();
+      quizDialog.showModal();
+    }
+
+    function renderQuestion() {
+      const question = quizQuestions[currentQuestionIndex];
+      answered = false;
+      quizProgress.textContent = `Question ${currentQuestionIndex + 1} of ${quizQuestions.length}`;
+      quizQuestion.textContent = question.asksForKanji
+        ? `Which kanji matches the reading ${question.card.reading}?`
+        : `What is the reading of ${question.card.kanji}?`;
+      quizFeedback.textContent = '';
+      quizFeedback.className = 'quiz-feedback';
+      nextQuestionButton.disabled = true;
+      nextQuestionButton.textContent = currentQuestionIndex === quizQuestions.length - 1 ? 'Finish' : 'Next';
+      quizChoices.replaceChildren();
+
+      question.choices.forEach(choice => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'quiz-choice';
+        button.textContent = question.asksForKanji ? choice.kanji : choice.reading;
+        button.dataset.correct = String(choice === question.card);
+        button.addEventListener('click', () => checkAnswer(button, choice, question));
+        quizChoices.append(button);
+      });
+    }
+
+    function checkAnswer(selectedButton, selectedChoice, question) {
+      if (answered) {
+        return;
+      }
+      answered = true;
+      const isCorrect = selectedChoice === question.card;
+      const correctButton = quizChoices.querySelector('[data-correct="true"]');
+      correctButton.classList.add('is-correct');
+      selectedButton.classList.add(isCorrect ? 'is-correct' : 'is-wrong');
+      quizFeedback.classList.add(isCorrect ? 'is-correct' : 'is-wrong');
+      quizFeedback.textContent = isCorrect
+        ? '✓ Correct!'
+        : `✗ Incorrect. Correct answer: ${question.asksForKanji ? question.card.kanji : question.card.reading}`;
+      quizChoices.querySelectorAll('button').forEach(button => {
+        button.disabled = true;
+      });
+      nextQuestionButton.disabled = false;
+      nextQuestionButton.focus();
+    }
+
+    document.getElementById('open-kanji-quiz').addEventListener('click', () => {
+      setIndexExpanded(false);
+      startQuiz();
+    });
+
+    document.getElementById('cancel-quiz').addEventListener('click', () => {
+      quizDialog.close();
+    });
+
+    quizDialog.addEventListener('close', () => {
+      indexToggle.focus();
+    });
+
+    nextQuestionButton.addEventListener('click', () => {
+      if (currentQuestionIndex === quizQuestions.length - 1) {
+        quizDialog.close();
+        return;
+      }
+      currentQuestionIndex += 1;
+      renderQuestion();
     });
   </script>
 </body>
