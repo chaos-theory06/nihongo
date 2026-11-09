@@ -141,6 +141,17 @@
       outline: 3px solid #818cf8;
       outline-offset: 2px;
     }
+    .example-play-btn::before {
+      inset: 6px;
+      border-width: 3px;
+    }
+    .example-play-btn::after {
+      left: 19px;
+      top: 16px;
+      border-top-width: 6px;
+      border-bottom-width: 6px;
+      border-left-width: 9px;
+    }
     .empty-cell {
       color: #a0aec0;
       font-style: italic;
@@ -1733,6 +1744,11 @@
 
     document.querySelectorAll('.play-btn').forEach(button => {
       button.setAttribute('aria-label', 'Play Japanese audio');
+    });
+
+    document.querySelectorAll('.table-wrapper tbody tr td:last-child .play-btn').forEach(button => {
+      button.classList.add('example-play-btn');
+      button.setAttribute('aria-label', 'Play example sentence in Japanese');
     });
 
     const indexToggle = document.getElementById('index-toggle');

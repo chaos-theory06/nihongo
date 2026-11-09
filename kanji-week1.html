@@ -177,6 +177,54 @@
     .japanese {
       font-size: 1.1rem;
     }
+    .example-audio {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .example-audio-button {
+      position: relative;
+      flex: 0 0 44px;
+      width: 44px;
+      height: 44px;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      background: transparent;
+      cursor: pointer;
+    }
+    .example-audio-button::before {
+      position: absolute;
+      inset: 8px;
+      border: 3px solid #203653;
+      border-radius: 50%;
+      content: "";
+    }
+    .example-audio-button::after {
+      position: absolute;
+      top: 16px;
+      left: 19px;
+      width: 0;
+      height: 0;
+      border-top: 6px solid transparent;
+      border-bottom: 6px solid transparent;
+      border-left: 9px solid #203653;
+      content: "";
+    }
+    .example-audio-button:hover {
+      background: #e8edf3;
+    }
+    .example-audio-button:active {
+      transform: scale(0.95);
+    }
+    .example-audio-button:focus-visible {
+      outline: 3px solid #818cf8;
+      outline-offset: 2px;
+    }
+    #audio-status {
+      color: #64748b;
+      font-size: 0.9rem;
+    }
     ruby {
       ruby-align: center;
     }
@@ -210,6 +258,7 @@
       <h1>Kanji N4 — Week 1</h1>
       <button class="quiz-launch" id="open-kanji-quiz" type="button">Quiz</button>
     </div>
+    <p id="audio-status" role="status" aria-live="polite"></p>
     <div class="table-wrapper">
       <table>
         <thead>
@@ -259,6 +308,84 @@
     </div>
   </dialog>
   <script>
+    const audioStatus = document.getElementById('audio-status');
+
+    function textWithFurigana(node) {
+      if (node.nodeType === Node.TEXT_NODE) {
+        return node.textContent;
+      }
+      if (!(node instanceof Element)) {
+        return '';
+      }
+      if (node.tagName === 'RUBY') {
+        return node.querySelector('rt')?.textContent.trim() || node.textContent;
+      }
+      if (node.tagName === 'RT') {
+        return '';
+      }
+      return [...node.childNodes].map(textWithFurigana).join('');
+    }
+
+    function speakJapanese(text) {
+      if (!('speechSynthesis' in window) || !('SpeechSynthesisUtterance' in window)) {
+        audioStatus.textContent = 'Text-to-speech is not supported in this browser.';
+        return;
+      }
+
+      const synthesis = window.speechSynthesis;
+      if (synthesis.speaking || synthesis.pending) {
+        synthesis.cancel();
+      }
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'ja-JP';
+      utterance.rate = 0.85;
+
+      const voices = synthesis.getVoices();
+      const japaneseVoice = voices.find(voice => voice.name.includes('Microsoft Nanami Online (Natural)')) ||
+        voices.find(voice => voice.name.includes('Nanami')) ||
+        voices.find(voice => /^ja[-_]/i.test(voice.lang));
+
+      if (japaneseVoice) {
+        utterance.voice = japaneseVoice;
+        utterance.lang = japaneseVoice.lang;
+      }
+
+      utterance.onstart = () => {
+        audioStatus.textContent = 'Playing Japanese audio.';
+      };
+      utterance.onend = () => {
+        audioStatus.textContent = '';
+      };
+      utterance.onerror = event => {
+        if (event.error !== 'canceled' && event.error !== 'interrupted') {
+          audioStatus.textContent = 'Audio could not be played. Check your media volume and Japanese text-to-speech settings.';
+        }
+      };
+
+      synthesis.resume();
+      synthesis.speak(utterance);
+    }
+
+    document.querySelectorAll('tbody tr td:last-child').forEach(cell => {
+      const sentence = document.createElement('span');
+      sentence.className = 'example-sentence';
+      while (cell.firstChild) {
+        sentence.append(cell.firstChild);
+      }
+
+      const audio = document.createElement('span');
+      audio.className = 'example-audio';
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'example-audio-button';
+      button.setAttribute('aria-label', 'Play example sentence in Japanese');
+      button.addEventListener('click', () => speakJapanese(textWithFurigana(sentence).trim()));
+
+      audio.append(sentence, button);
+      cell.append(audio);
+    });
+
     const weekOneKanji = [...document.querySelectorAll('tbody tr')].map(row => {
       const cells = row.querySelectorAll('td');
       return {
