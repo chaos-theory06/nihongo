@@ -31,8 +31,123 @@
       font-weight: 600;
     }
     h1 {
-      margin: 0.75rem 0 1.5rem;
+      margin: 0;
       color: #2c3e50;
+    }
+    .page-heading {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin: 0.75rem 0 1.5rem;
+    }
+    .quiz-launch,
+    .quiz-action {
+      min-height: 44px;
+      padding: 0.7rem 1rem;
+      border: 0;
+      border-radius: 8px;
+      background: #4b1d8f;
+      color: #ffffff;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .quiz-launch:hover,
+    .quiz-action:hover:not(:disabled) {
+      background: #38146d;
+    }
+    .quiz-launch:focus-visible,
+    .quiz-action:focus-visible,
+    .quiz-choice:focus-visible {
+      outline: 3px solid #a78bfa;
+      outline-offset: 2px;
+    }
+    .quiz-dialog {
+      width: min(560px, calc(100% - 2rem));
+      max-height: min(90vh, 760px);
+      max-height: min(90dvh, 760px);
+      padding: 1.5rem;
+      overflow-y: auto;
+      border: 0;
+      border-radius: 14px;
+      background: #ffffff;
+      color: #2c3e50;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25);
+    }
+    .quiz-dialog::backdrop {
+      background: rgba(15, 23, 42, 0.62);
+    }
+    .quiz-dialog h2 {
+      margin: 0 0 0.5rem;
+    }
+    .quiz-progress {
+      margin: 0 0 1rem;
+      color: #64748b;
+      font-weight: 600;
+    }
+    .quiz-question {
+      margin: 0 0 1rem;
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+    .quiz-choices {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.75rem;
+    }
+    .quiz-choice {
+      min-height: 56px;
+      padding: 0.6rem 0.85rem;
+      border: 2px solid #dbe3ec;
+      border-radius: 8px;
+      background: #f1f5f9;
+      color: #2c3e50;
+      font: inherit;
+      font-weight: 600;
+      overflow-wrap: anywhere;
+      cursor: pointer;
+    }
+    .quiz-choice:hover:not(:disabled) {
+      background: #e2e8f0;
+    }
+    .quiz-choice:disabled {
+      cursor: default;
+    }
+    .quiz-choice.is-correct {
+      border-color: #15803d;
+      background: #dcfce7;
+      color: #14532d;
+    }
+    .quiz-choice.is-wrong {
+      border-color: #b91c1c;
+      background: #fee2e2;
+      color: #7f1d1d;
+    }
+    .quiz-feedback {
+      min-height: 1.5em;
+      margin: 1rem 0;
+      font-weight: 700;
+    }
+    .quiz-feedback.is-correct {
+      color: #15803d;
+    }
+    .quiz-feedback.is-wrong {
+      color: #b91c1c;
+    }
+    .quiz-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+    }
+    .quiz-action.cancel {
+      background: #e2e8f0;
+      color: #2c3e50;
+    }
+    .quiz-action:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
     .table-wrapper {
       overflow-x: auto;
@@ -79,13 +194,22 @@
       main {
         padding: 1.25rem;
       }
+      .quiz-dialog {
+        padding: 1.25rem;
+      }
+      .quiz-choices {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 <body>
   <main>
     <a class="back-link" href="index.html">← Back to Index</a>
-    <h1>Kanji N4 — Week 1</h1>
+    <div class="page-heading">
+      <h1>Kanji N4 — Week 1</h1>
+      <button class="quiz-launch" id="open-kanji-quiz" type="button">Quiz</button>
+    </div>
     <div class="table-wrapper">
       <table>
         <thead>
@@ -123,5 +247,114 @@
       </table>
     </div>
   </main>
+  <dialog class="quiz-dialog" id="kanji-quiz" aria-labelledby="quiz-title">
+    <h2 id="quiz-title">Kanji Week 1 Quiz</h2>
+    <p class="quiz-progress" id="quiz-progress"></p>
+    <p class="quiz-question" id="quiz-question"></p>
+    <div class="quiz-choices" id="quiz-choices"></div>
+    <p class="quiz-feedback" id="quiz-feedback" role="status" aria-live="polite"></p>
+    <div class="quiz-actions">
+      <button class="quiz-action cancel" id="cancel-quiz" type="button">Cancel</button>
+      <button class="quiz-action" id="next-question" type="button" disabled>Next</button>
+    </div>
+  </dialog>
+  <script>
+    const weekOneKanji = [...document.querySelectorAll('tbody tr')].map(row => {
+      const cells = row.querySelectorAll('td');
+      return {
+        kanji: cells[0].textContent.trim(),
+        reading: cells[1].textContent.trim()
+      };
+    });
+
+    const quizDialog = document.getElementById('kanji-quiz');
+    const quizProgress = document.getElementById('quiz-progress');
+    const quizQuestion = document.getElementById('quiz-question');
+    const quizChoices = document.getElementById('quiz-choices');
+    const quizFeedback = document.getElementById('quiz-feedback');
+    const nextQuestionButton = document.getElementById('next-question');
+    let quizQuestions = [];
+    let currentQuestionIndex = 0;
+    let answered = false;
+
+    function shuffled(items) {
+      const result = [...items];
+      for (let index = result.length - 1; index > 0; index -= 1) {
+        const otherIndex = Math.floor(Math.random() * (index + 1));
+        [result[index], result[otherIndex]] = [result[otherIndex], result[index]];
+      }
+      return result;
+    }
+
+    function startQuiz() {
+      quizQuestions = shuffled(weekOneKanji).slice(0, 10).map(card => ({
+        card,
+        asksForKanji: Math.random() < 0.5,
+        choices: shuffled(weekOneKanji.filter(option => option !== card)).slice(0, 3)
+      }));
+      quizQuestions.forEach(question => {
+        question.choices.push(question.card);
+        question.choices = shuffled(question.choices);
+      });
+      currentQuestionIndex = 0;
+      renderQuestion();
+      quizDialog.showModal();
+    }
+
+    function renderQuestion() {
+      const question = quizQuestions[currentQuestionIndex];
+      answered = false;
+      quizProgress.textContent = `Question ${currentQuestionIndex + 1} of ${quizQuestions.length}`;
+      quizQuestion.textContent = question.asksForKanji
+        ? `Which kanji matches the reading ${question.card.reading}?`
+        : `What is the reading of ${question.card.kanji}?`;
+      quizFeedback.textContent = '';
+      quizFeedback.className = 'quiz-feedback';
+      nextQuestionButton.disabled = true;
+      nextQuestionButton.textContent = currentQuestionIndex === quizQuestions.length - 1 ? 'Finish' : 'Next';
+      quizChoices.replaceChildren();
+
+      question.choices.forEach(choice => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'quiz-choice';
+        button.textContent = question.asksForKanji ? choice.kanji : choice.reading;
+        button.dataset.correct = String(choice === question.card);
+        button.addEventListener('click', () => checkAnswer(button, choice, question));
+        quizChoices.append(button);
+      });
+    }
+
+    function checkAnswer(selectedButton, selectedChoice, question) {
+      if (answered) {
+        return;
+      }
+      answered = true;
+      const isCorrect = selectedChoice === question.card;
+      const correctButton = quizChoices.querySelector('[data-correct="true"]');
+      correctButton.classList.add('is-correct');
+      selectedButton.classList.add(isCorrect ? 'is-correct' : 'is-wrong');
+      quizFeedback.classList.add(isCorrect ? 'is-correct' : 'is-wrong');
+      quizFeedback.textContent = isCorrect
+        ? '✓ Correct!'
+        : `✗ Incorrect. Correct answer: ${question.asksForKanji ? question.card.kanji : question.card.reading}`;
+      quizChoices.querySelectorAll('button').forEach(button => {
+        button.disabled = true;
+      });
+      nextQuestionButton.disabled = false;
+      nextQuestionButton.focus();
+    }
+
+    document.getElementById('open-kanji-quiz').addEventListener('click', startQuiz);
+    document.getElementById('cancel-quiz').addEventListener('click', () => quizDialog.close());
+    nextQuestionButton.addEventListener('click', () => {
+      if (currentQuestionIndex === quizQuestions.length - 1) {
+        quizDialog.close();
+        return;
+      }
+      currentQuestionIndex += 1;
+      renderQuestion();
+    });
+  </script>
 </body>
 </html>
